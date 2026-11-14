@@ -10,7 +10,7 @@
 |---|---|
 | Group ID | CR7LVM10 |
 | Challenge | T02 · Raw QC Triage (ảnh mờ, lóa, thiếu sáng, nén) |
-| Thành viên (4) + vai trò | 1. Hungcui (Lead / Integrator & Pipeline CLI) · 2. loversky02 (Core Algorithm & QC Features) · 3. ptt07042005 (QA, Tests & Controlled Real Eval) · 4. Le Tuan Anh (Human Review, Decision & Metric Evaluation) |
+| Thành viên (4) + vai trò | 1. Hungcui (2A202604038 - Lead / Integrator & Pipeline CLI) · 2. Đỗ Anh Hoàng (2A202604061 - Core Algorithm & QC Features) · 3. Phạm Trung Thành (2A202604050 - QA, Tests & Controlled Real Eval) · 4. Lê Tuấn Anh (2A202604064 - Human Review, Decision & Metric Evaluation) |
 | Git URL | https://github.com/Hungcui/K5-L2-DAY06-CR7LVM10-DataGovernanceAndPrivacy |
 | Tag `demo-180m` (commit) | `552c732` (hoàn thành QA test & failure mode analysis) |
 | Tag `final-24h` (commit) | `9598c32` (tích hợp pipeline E2E, 100 ảnh thật benchmark và báo cáo toàn diện) |
@@ -214,12 +214,12 @@ pytest -v
 
 **Bảng 2 · Individual contribution evidence** (khớp với `git shortlog -sne --all` và `reports/team_contributions.csv`)
 
-| Học viên | Git author/email | Module / vai trò | Commit SHA / diff chứng minh | Trình bày? |
-|---|---|---|---|---|
-| Member 1 | Hungcui <97034606+Hungcui@users.noreply.github.com> | Lead / Integrator & Pipeline CLI | `9598c32`, `77e0be5` (cấu hình configs/lab.yaml, kết nối src/pipeline.py, tạo demo 100 ảnh thật) | Có (Presenter) |
-| Member 2 | loversky02 <bao232030333@lms.utc.edu.vn> | Core Algorithm & QC Features | `77e0be5` (thuật toán 4 đặc trưng, chuẩn hóa camera/light, 17 unit test) | Không |
-| Member 3 | ptt07042005 <luongsonha456@gmail.com> | QA & Failure Mode Analysis | `552c732` (tests/test_t02_qc.py, tests/test_t02_real_samples.py, tools/t02_real_controlled_eval.py, demo PNGs) | Không |
-| Member 4 | Le Tuan Anh-2A202604064 <letuananh.cntt05@gmail.com> | Human Review & Metric Evaluation | `b0ce8bf`, `9598c32` (hoàn thiện báo cáo, đánh giá metric so sánh baseline vs poc, audit log) | Có (Presenter) |
+| Học viên | Họ tên & MSV | Git author/email | Module / vai trò | Commit SHA / diff chứng minh | Trình bày? |
+|---|---|---|---|---|---|
+| Member 1 | Hungcui (2A202604038) | Hungcui <hungcui710@gmail.com> | Lead / Integrator & Pipeline CLI | `7c5c3f2`, `9598c32`, `77e0be5` (configs/lab.yaml, src/pipeline.py, showcase 100 ảnh thật) | Có (Presenter) |
+| Member 2 | Đỗ Anh Hoàng (2A202604061) | doanhhoang <2a202604061@student.edu.vn> | Core Algorithm & QC Features | `77e0be5` (thuật toán 4 đặc trưng, chuẩn hóa camera/light, 17 unit test) | Không |
+| Member 3 | Phạm Trung Thành (2A202604050) | ptt07042005 <luongsonha456@gmail.com> | QA & Failure Mode Analysis | `552c732` (tests/test_t02_qc.py, tests/test_t02_real_samples.py, tools/t02_real_controlled_eval.py, demo PNGs) | Không |
+| Member 4 | Lê Tuấn Anh (2A202604064) | Le Tuan Anh-2A202604064 <letuananh.cntt05@gmail.com> | Human Review & Metric Evaluation | `b0ce8bf`, `9598c32`, `7c5c3f2` (hoàn thiện báo cáo, đánh giá metric so sánh baseline vs poc, audit log) | Có (Presenter) |
 
 ## 11 · References
 

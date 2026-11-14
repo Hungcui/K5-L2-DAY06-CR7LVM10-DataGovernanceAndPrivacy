@@ -7,12 +7,12 @@
 
 ## 1. TỔNG QUAN PHÂN CHIA VAI TRÒ (4 THÀNH VIÊN)
 
-| Thành viên | Vai trò | Trọng tâm công việc | File sở hữu chính |
-|---|---|---|---|
-| **Member 1 (Lead)** | Pipeline Integrator & Risk Owner | Wiring pipeline E2E, quản trị Git, ký duyệt quyết định release (KEEP/RECAPTURE) | `configs/lab.yaml`, `src/pipeline.py` (wiring & decide), `reports/metric_contract.md` |
-| **Member 2** | Core Algorithm & Feature Engineer | Code thuật toán phát hiện 4 loại lỗi ảnh, tính điểm tổng hợp `score` | `src/pipeline.py` (hàm `process()`) |
-| **Member 3** | QA & Failure Mode Analysis | Viết Unit Tests, phân tích 3 failure cases bắt buộc của T02 | `tests/test_t02_qc.py`, `reports/group_report.md` (Mục 06) |
-| **Member 4** | Human Reviewer & Final Report / Demo | Vận hành vòng duyệt người (Contact Sheet HTML), viết báo cáo, làm slide demo | `out/poc/contact_sheet.html`, `reports/group_report.md`, `demo/` |
+| Thành viên | Họ tên & MSV | Vai trò | Trọng tâm công việc | File sở hữu chính |
+|---|---|---|---|---|
+| **Member 1 (Lead)** | Hungcui (2A202604038) | Pipeline Integrator & Risk Owner | Wiring pipeline E2E, quản trị Git, ký duyệt quyết định release (KEEP/RECAPTURE) | `configs/lab.yaml`, `src/pipeline.py` (wiring & decide), `reports/metric_contract.md` |
+| **Member 2** | Đỗ Anh Hoàng (2A202604061) | Core Algorithm & Feature Engineer | Code thuật toán phát hiện 4 loại lỗi ảnh, tính điểm tổng hợp `score` | `src/t02_qc.py`, `src/pipeline.py` (hàm `process()`) |
+| **Member 3** | Phạm Trung Thành (2A202604050) | QA & Failure Mode Analysis | Viết Unit Tests, phân tích 3 failure cases bắt buộc của T02 | `tests/test_t02_qc.py`, `tests/test_t02_real_samples.py`, `reports/group_report.md` (Mục 06) |
+| **Member 4** | Lê Tuấn Anh (2A202604064) | Human Reviewer & Final Report / Demo | Vận hành vòng duyệt người (Contact Sheet HTML), viết báo cáo, làm slide demo | `out/poc/contact_sheet.html`, `reports/group_report.md`, `demo/` |
 
 ---
 
