@@ -216,7 +216,7 @@ pytest -v
 
 | Học viên | Họ tên & MSV | Git author/email | Module / vai trò | Commit SHA / diff chứng minh | Trình bày? |
 |---|---|---|---|---|---|
-| Member 1 | Hungcui (2A202604038) | Hungcui <hungcui710@gmail.com> | Lead / Integrator & Pipeline CLI | `7c5c3f2`, `9598c32`, `77e0be5` (configs/lab.yaml, src/pipeline.py, showcase 100 ảnh thật) | Có (Presenter) |
+| Member 1 | Nguyễn Quốc Hưng (2A202604038) | Hungcui <hungcui710@gmail.com> | Lead / Integrator & Pipeline CLI | `7c5c3f2`, `9598c32`, `77e0be5` (configs/lab.yaml, src/pipeline.py, showcase 100 ảnh thật) | Có (Presenter) |
 | Member 2 | Đỗ Anh Hoàng (2A202604061) | doanhhoang <2a202604061@student.edu.vn> | Core Algorithm & QC Features | `77e0be5` (thuật toán 4 đặc trưng, chuẩn hóa camera/light, 17 unit test) | Không |
 | Member 3 | Phạm Trung Thành (2A202604050) | ptt07042005 <luongsonha456@gmail.com> | QA & Failure Mode Analysis | `552c732` (tests/test_t02_qc.py, tests/test_t02_real_samples.py, tools/t02_real_controlled_eval.py, demo PNGs) | Không |
 | Member 4 | Lê Tuấn Anh (2A202604064) | Le Tuan Anh-2A202604064 <letuananh.cntt05@gmail.com> | Human Review & Metric Evaluation | `b0ce8bf`, `9598c32`, `7c5c3f2` (hoàn thiện báo cáo, đánh giá metric so sánh baseline vs poc, audit log) | Có (Presenter) |
