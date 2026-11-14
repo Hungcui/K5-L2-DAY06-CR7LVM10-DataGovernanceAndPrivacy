@@ -35,14 +35,21 @@ def load(ctx: RunContext) -> dict:
         if ctx.config.get("strict_provenance", True):
             raise ValueError(f"provenance check failed ({len(problems)} problems), first: {problems[:3]}")
     data = {"manifest": pd.read_csv(manifest) if manifest.exists() else None}
-    # TODO: load the tables/images your track needs, e.g.
-    # data["images"] = pd.read_csv(ctx.input_dir / "images.csv")
+    images_csv = ctx.input_dir / "images.csv"
+    if images_csv.exists():
+        data["images"] = pd.read_csv(images_csv)
     return data
 
 
 # ---------------------------------------------------------------- 02 process
 def process(ctx: RunContext, data: dict) -> pd.DataFrame:
     spec = get_track(ctx.track)
+    if ctx.track == "t02":
+        from . import t02_qc
+        if "images" not in data or data["images"] is None:
+            raise ValueError("t02 requires images.csv in input directory")
+        ranked = t02_qc.run_poc(data["images"], ctx.input_dir, cfg=ctx.config.get("params", {}))
+        return t02_qc.to_output(ranked)
     raise NotImplementedError(
         f"Implement process() for {spec.track} ({spec.title}). It must produce a DataFrame with at least "
         f"{spec.pred_columns} (saved as out/{spec.pred_file}). See docs/tracks/{spec.track.upper()}.md"
@@ -56,30 +63,60 @@ def rank(ctx: RunContext, scored: pd.DataFrame) -> pd.DataFrame:
     if "score" not in scored.columns:
         raise ValueError("rank(): process() output needs a numeric `score` column (higher = review first), "
                          "or adapt rank() to your track")
+    evidence = "path" if "path" in scored.columns else None
     q = make_review_queue(scored, id_col=scored.columns[0], score_col="score", budget=budget,
-                          reason_col="reason" if "reason" in scored.columns else None)
+                          reason_col="reason" if "reason" in scored.columns else None,
+                          evidence_col=evidence)
     write_review_queue(q, ctx.out("review_queue.csv"))
+    if evidence:
+        from .common.contact_sheet import render_contact_sheet
+        render_contact_sheet(q, ctx.out("contact_sheet.html"), image_root=ctx.input_dir,
+                             title=f"T02 Raw QC Review Queue (top-{budget})")
     return q
 
 
 # ---------------------------------------------------------------- 04 review
 def review(ctx: RunContext, scored: pd.DataFrame, queue: pd.DataFrame) -> pd.DataFrame:
-    """If a reviewed queue exists (out/review_queue_reviewed.csv), apply it. Otherwise pass through.
-
-    TODO: decide what an `edit` / `reject` means for your track and apply it
-    (e.g. via common.review.apply_overrides), logging every change to ctx.audit.
-    """
+    """If a reviewed queue exists (out/review_queue_reviewed.csv), apply it. Otherwise pass through."""
     reviewed_path = ctx.output_dir / "review_queue_reviewed.csv"
     if reviewed_path.exists():
         reviewed = load_review_decisions(reviewed_path)
         ctx.stats["n_reviewed"] = len(reviewed)
-        # TODO: apply overrides
+        out = scored.copy()
+        for _, row in reviewed.iterrows():
+            item_id = str(row["item_id"])
+            dec = row.get("reviewer_decision")
+            if dec in ("approve", "reject", "edit"):
+                ctx.audit.log(actor=str(row.get("reviewer", "reviewer")), action="reviewer_override",
+                              item_id=item_id, after={"decision": dec, "note": str(row.get("review_note", ""))})
+                idx = out[out[out.columns[0]] == item_id].index
+                if len(idx):
+                    if dec == "approve":
+                        out.loc[idx, "score"] = 0.0
+                        if "pred_action" in out.columns:
+                            out.loc[idx, "pred_action"] = "KEEP"
+                    elif dec == "reject":
+                        out.loc[idx, "score"] = max(out.loc[idx, "score"].max(), 5.0)
+                        if "pred_action" in out.columns:
+                            out.loc[idx, "pred_action"] = "RECAPTURE"
+        return out
     return scored
 
 
 # ---------------------------------------------------------------- 05 decide
 def decide(ctx: RunContext, final: pd.DataFrame) -> Decision:
-    # TODO: replace with your policy (thresholds frozen BEFORE looking at eval results)
+    if ctx.track == "t02":
+        from . import t02_qc
+        status, reason_code = t02_qc.batch_decision(final, split="eval", max_recapture_rate=0.4)
+        recapture_count = int((final.get("pred_action", "") == "RECAPTURE").sum()) if "pred_action" in final.columns else 0
+        return Decision(
+            status=status,
+            reason_code=reason_code,
+            reason=f"T02 QC batch decision: {recapture_count}/{len(final)} items flagged for recapture",
+            owner=ctx.config.get("owner", "Team Lead (CR7LVM10)"),
+            scope=ctx.track,
+            evidence=[str(ctx.out("ranked_review.csv")), str(ctx.out("review_queue.csv"))]
+        )
     return Decision(status="HOLD", reason_code="POLICY_NOT_IMPLEMENTED", reason="Decision policy not implemented yet",
                     owner=ctx.config.get("owner", "TODO-owner"), scope=ctx.track)
 

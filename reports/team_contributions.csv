@@ -1,6 +1,5 @@
 member,git_author_name,git_email,role,modules_files,commit_shas,evidence_note,presenter
-Member 1,,,Lead / Integrator,src/main.py; configs/,,,
-Member 2,,,Data & fixtures,fixtures/; tools/,,,
-Member 3,,,Core algorithm,src/pipeline.py,,,
-Member 4,,,QA / metric,tests/; reports/metrics_*.json,,,
-Member 5,,,Human review + report,reports/group_report.md; demo/,,,
+Member 1,Hungcui,97034606+Hungcui@users.noreply.github.com,Lead / Integrator & Pipeline CLI,configs/lab.yaml; src/pipeline.py (wiring); reports/metric_contract.md; tools/make_showcase.py,9598c32; 77e0be5,Wired 5-step pipeline CLI; configured lab.yaml; integrated 100 real images showcase,Yes
+Member 2,loversky02,bao232030333@lms.utc.edu.vn,Core Algorithm & QC Features,src/t02_qc.py; tests/test_t02_fixtures.py; tests/test_t02_team.py,77e0be5,Implemented 4-feature QC algorithm with camera/light normalization + 17 unit tests,No
+Member 3,ptt07042005,luongsonha456@gmail.com,QA & Failure Mode Analysis,tests/test_t02_qc.py; tests/test_t02_real_samples.py; tools/t02_real_controlled_eval.py; demo/t02_case*.png,552c732,Created CLI & real sample unit tests; 3 failure mode visuals; 48-defect controlled eval,No
+Member 4,Le Tuan Anh-2A202604064,letuananh.cntt05@gmail.com,Human Review & Metric Evaluation,reports/group_report.md; reports/metrics_*.json; data/gold_dev_eval.csv; reports/table1_baseline_vs_poc.md,b0ce8bf; 9598c32,Completed full group report; evaluated baseline vs PoC; audited decision policy,Yes
