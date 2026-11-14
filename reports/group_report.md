@@ -68,14 +68,68 @@
 
 ## 06 · Result slices
 
-| Slice | N | Baseline | PoC | Ghi chú |
-|---|---|---|---|---|
-| | | | | |
-| | | | | |
+### 06.1 · Ba failure mode bắt buộc
 
-- Failure case 1 (ảnh/metadata + root cause): ____
-- Failure case 2: ____
-- Latency / compute (máy, CPU, ms/item): ____
+#### Failure case 1 — Nguy cơ loại nhầm ảnh đêm hợp lệ
+
+- **Ảnh minh họa:** `img_01_0`
+- **Metadata:** `camera_id=cam_A`, `light=night`, `split=eval`
+- **Kết quả PoC:** `score=0.37`, `pred_action=KEEP`, `pred_defect_type=none`
+- **Phân tích:** Ảnh được chụp ban đêm nên độ sáng trung bình thấp, nhưng phương tiện, làn đường và các chi tiết quan trọng vẫn quan sát được. Nếu sử dụng một ngưỡng độ sáng chung cho cả ảnh ngày và ảnh đêm, ảnh này có nguy cơ bị nhận nhầm là lỗi thiếu sáng.
+- **Root cause:** Thuật toán đơn giản dễ đánh đồng điều kiện ánh sáng ban đêm tự nhiên với lỗi underexposure.
+- **Biện pháp:** PoC chuẩn hóa đặc trưng `dark` theo trường `light`, giúp so sánh ảnh đêm với nhóm ảnh đêm thay vì trực tiếp với ảnh ban ngày.
+
+![Ảnh đêm hợp lệ](../demo/t02_case1_night_poc.png)
+
+#### Failure case 2 — Baseline bỏ sót lóa cục bộ
+
+- **Ảnh minh họa:** `img_17_2`
+- **Metadata:** `camera_id=cam_A`, `light=day`, `split=eval`
+- **Kết quả baseline:** `score=-6.16`, `pred_action=KEEP`, `pred_defect_type=none`
+- **Kết quả PoC:** `score=48.02`, `pred_action=RECAPTURE`, `pred_defect_type=glare`
+- **Phân tích:** Ảnh còn nhiều cạnh rõ nét nhưng một vùng lớn bị cháy sáng. Baseline chỉ dùng Laplacian toàn ảnh nên không phát hiện được lỗi lóa này.
+- **Root cause:** Đặc trưng toàn ảnh làm vùng lóa cục bộ bị trung bình hóa; baseline cũng không có đặc trưng đo tỷ lệ pixel bão hòa.
+- **Biện pháp:** PoC chia ảnh thành lưới và lấy tỷ lệ pixel bão hòa lớn nhất ở từng ô để phát hiện glare cục bộ.
+
+![PoC phát hiện lóa cục bộ](../demo/t02_case2_glare_poc.png)
+
+#### Failure case 3 — Camera bias đối với cam_B
+
+- **Ảnh minh họa:** `img_12_0`
+- **Metadata:** `camera_id=cam_B`, `light=dusk`, `split=dev`
+- **Kết quả baseline:** `score=-5.14`, `pred_action=RECAPTURE`, `pred_defect_type=blur`
+- **Kết quả PoC:** `score=1.93`, `pred_action=KEEP`, `pred_defect_type=none`
+- **Phân tích:** Ảnh vẫn sử dụng được nhưng baseline đánh giá là mờ vì cam_B có đặc tính quang học mềm hơn cam_A.
+- **Root cause:** Một ngưỡng Laplacian chung cho tất cả camera tạo ra thiên lệch đối với camera có độ sắc nét tự nhiên thấp hơn. Trong kết quả baseline, tỷ lệ `RECAPTURE` ở lát cắt `cam_B/dusk` là `5/8 = 62%`, trong khi `cam_A/dusk` chỉ là `1/12 = 8%`.
+- **Biện pháp:** PoC chuẩn hóa đặc trưng blur theo từng `camera_id` bằng median và MAD, tránh so sánh trực tiếp cam_B với cam_A.
+
+![PoC giữ lại ảnh cam_B hợp lệ](../demo/t02_case3_camera_poc.png)
+
+### 06.2 · Kiểm thử trên ảnh thật theo yêu cầu Labcoach
+
+- Dùng `tools/download_real_samples.py` tải 30 ảnh thật từ BDD100K với `seed=42` và `max_side=640`.
+- Mẫu gồm 11 ảnh đêm, 8 ảnh ban ngày, 3 ảnh bình minh/hoàng hôn và 8 ảnh chưa xác định thời điểm.
+- Chạy `tests/test_t02_real_samples.py`: **4 test passed**.
+- Bộ test kiểm tra tính toàn vẹn manifest, mỗi ảnh được chấm đúng một lần, điểm số hữu hạn và sắp xếp đúng, tính tái lập, cùng độ phủ nhiều điều kiện ánh sáng.
+- Để có nhãn kiểm thử xác định mà không đọc ground truth ẩn, nhóm dùng 18 ảnh thật làm thống kê tham chiếu và 12 ảnh thật held-out. Trên mỗi ảnh held-out, nhóm tạo bốn bản lỗi xác định (`blur`, `dark`, `glare`, `compression`), tổng cộng **48 trường hợp lỗi có nhãn**.
+
+| Kết quả trên 48 lỗi cài vào ảnh thật | PoC | Baseline | Chênh lệch PoC |
+|---|---:|---:|---:|
+| Phát hiện và yêu cầu chụp lại | 42/48 (87.50%) | 33/48 (68.75%) | +18.75 điểm % |
+| Dự đoán đúng loại lỗi | 40/48 (83.33%) | 12/48 (25.00%) | +58.33 điểm % |
+| Điểm lỗi cao hơn ảnh gốc cùng nguồn | 48/48 (100.00%) | 29/48 (60.42%) | +39.58 điểm % |
+
+| Loại lỗi | PoC phát hiện | PoC đúng loại | Baseline phát hiện | Baseline đúng loại |
+|---|---:|---:|---:|---:|
+| Blur | 12/12 | 12/12 | 12/12 | 12/12 |
+| Dark | 6/12 | 6/12 | 12/12 | 0/12 |
+| Glare | 12/12 | 10/12 | 3/12 | 0/12 |
+| Compression | 12/12 | 12/12 | 6/12 | 0/12 |
+
+- **Kết luận:** PoC vượt baseline rõ nhất ở khả năng phân loại loại lỗi và phát hiện glare/compression. Điểm yếu còn lại là `dark`: PoC chỉ phát hiện 6/12 trường hợp, dù cả 12 ảnh lỗi tối đều có điểm cao hơn ảnh gốc tương ứng. Đây là ưu tiên cải tiến threshold/chuẩn hóa độ sáng.
+- **Giới hạn diễn giải:** BDD không cung cấp nhãn QC tự nhiên cho ảnh gốc. Vì vậy nhóm chỉ báo recall trên 48 lỗi được cài có kiểm soát; không tuyên bố precision, false-positive rate hoặc Defect Recall@20 trên ảnh BDD nguyên gốc.
+- Dữ liệu ảnh thật được giữ cục bộ trong `data/real/` và không commit lên repository công khai.
+- **Latency/compute:** Điền từ `out/poc/run_info.json` sau khi Member 1/2 hoàn thiện pipeline E2E.
 
 ## 07 · Human & decision
 
